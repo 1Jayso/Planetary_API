@@ -23,7 +23,7 @@ app.config['MAIL_USE_SSL'] = False
 db = SQLAlchemy(app)
 ma  = Marshmallow(app)
 jwt = JWTManager(app)
-mail = Mail(app)
+mail = Mail(app)git 
 
 @app.cli.command('create_db')
 def db_create():
