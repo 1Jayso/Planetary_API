@@ -1,10 +1,10 @@
 # Project Title
 
-Planetary API  using Flask --> This project is for anyone who wants who is just getting started with REST API
+Planetary API  using Flask --> This project is for anyone who is just getting started with REST API
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+To get started you must have python 3 up and running on your system.
 
 ### Ruuning the application
 
