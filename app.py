@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from flask_mail import Mail, Message
 import os
 
+
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'planets.db')
@@ -23,7 +24,7 @@ app.config['MAIL_USE_SSL'] = False
 db = SQLAlchemy(app)
 ma  = Marshmallow(app)
 jwt = JWTManager(app)
-mail = Mail(app)git 
+mail = Mail(app)
 
 @app.cli.command('create_db')
 def db_create():
@@ -161,6 +162,38 @@ def retrieve_password(email: str):
         mail.send(msg)
         return jsonify(message="Password sent to " + email)
     return jsonify(message="That email doesn't exist"), 404
+
+
+@app.route('/planet_details/<int:planet_id>', methods=["GET"])
+def planet_details(planet_id: int):
+    planet = Planet.query.filter_by(planet_id=planet_id).first()
+
+    if planet:
+        result = planet_schema.dump(planet)
+        return jsonify(data=result)
+    else:
+        return jsonify(Message="That planet doesn't exist!"), 404
+
+
+@app.route('/add_planet', methods=["POST"])
+def add_planet():
+    planet_name = request.form.get('planet_name')
+    test = Planet.query.filter_by(planet_name=planet_name).first()
+    if test:
+        return jsonify(Message="There is already a planet by the name " + planet_name), 409
+    else:
+        planet_type = request.form.get('planet_type')
+        home_star = request.form.get('home_star')
+        mass = float(request.form.get('mass'))
+        distance = float(request.form.get('distance'))
+        radius = float(request.form.get('radius'))
+
+        new_planet = Planet(planet_name=planet_name, planet_type=planet_type, home_star=home_star, 
+                            mass=mass, distance=distance, radius=radius)
+        db.session.add(new_planet)
+        db.session.commit()
+       
+        return jsonify(Message= planet_name + " has succesfully been added "), 201
 
 
 class User(db.Model):
