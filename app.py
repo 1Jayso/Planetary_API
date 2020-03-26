@@ -13,8 +13,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'pl
 app.config['JWT_SECRET_KEY'] = "Great" #Dont use this key in real life
 app.config['MAIL_SERVER']='smtp.mailtrap.io'
 app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
-app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+app.config['MAIL_USERNAME'] = os.environ.get('USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('PASS')
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
@@ -36,6 +36,7 @@ def db_create():
 def db_drop():
     db.drop_all()
     print("Database dropped!")
+    
 
 @app.cli.command('seed_db')
 def db_seed():
@@ -74,17 +75,7 @@ def db_seed():
     print("Databae seeded!")
                     
 
-
-
-
-
-
-
-
-
-
-
-
+# Route
 @app.route('/')
 def hello_world():
     return "Hello World!"
@@ -127,6 +118,7 @@ def register():
     if test:
         return jsonify(message = "That email already exist!"),409
     else:
+        email = request.form.get('email')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         password = request.form.get('password')
@@ -176,6 +168,7 @@ def planet_details(planet_id: int):
 
 
 @app.route('/add_planet', methods=["POST"])
+@jwt_required
 def add_planet():
     planet_name = request.form.get('planet_name')
     test = Planet.query.filter_by(planet_name=planet_name).first()
@@ -194,6 +187,50 @@ def add_planet():
         db.session.commit()
        
         return jsonify(Message= planet_name + " has succesfully been added "), 201
+
+
+@app.route('/update_planet', methods=['PUT'])
+@jwt_required
+def update_planet():
+    planet_id = int(request.form.get('planet_id'))
+    planet = Planet.query.filter_by(planet_id=planet_id).first()
+    if planet:
+        planet.planet_name = request.form.get('planet_name')
+        planet.planet_type = request.form.get('planet_type')
+        planet.home_star = request.form.get('home_star')
+        planet.mass = float(request.form.get('mass'))
+        planet.radius = float(request.form.get('radius'))
+        planet.distance = float(request.form.get('distance'))
+        
+        db.session.commit()
+
+        return jsonify(Message="You updated a planet"), 202
+
+    return jsonify(Message="That Planet doesn't exist"), 404
+    
+
+@app.route('/delete_planet/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    planet = Planet.query.filter_by(planet_id=planet_id).first()
+    if planet:
+        db.session.delete(planet)
+        db.session.commit()
+        return jsonify(Message="You deleted a planet"), 202
+    return jsonify(Message="Planet doesn't exist"), 404
+
+
+@app.route('/edit_user', methods=['PATCH'])
+@jwt_required
+def edit_user():
+    email = request.form.get('email')
+    user = User.query.filter_by(email=email).first()
+    if user:
+        user.password = request.form.get('password')
+        user.first_name = request.form.get('first_name')
+        user.last_name = request.form.get('last_name')
+        db.session.commit()
+        return jsonify(Message="Your credentials has been updated"), 202
+    return jsonify(Message="Incorrect email!"), 404
 
 
 class User(db.Model):
@@ -225,19 +262,13 @@ class UserSchema(ma.Schema):
 class PlanetSchema(ma.Schema):
     class Meta:
         fields = ('planet_id', 'planet_name', 'planet_type',
-                 'home_star', 'mass','radius', 'distnace')
+                 'home_star', 'mass','radius', 'distance')
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 planet_schema = PlanetSchema()
 planets_schema = PlanetSchema(many=True)
-
-
-
-
-
-
 
 
 

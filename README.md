@@ -11,7 +11,7 @@ To get started you must have python 3 up and running on your system.
 Create a virtual environment using the following scripts:
 
 ```
-python3 -m venv ["name of your Virtual Env]
+python3 -m venv ["name of your Virtual Env"]
 ```
 
 Install the the libraries used for this project by copying and pasting the below script in your terminal
