@@ -19,7 +19,7 @@ marshmallow==3.4.0
 mccabe==0.6.1
 post==2019.4.13
 public==2019.4.13
-PyJWT==1.7.1
+PyJWT==2.4.0
 pylint==2.4.4
 query-string==2019.4.13
 requests==2.22.0
